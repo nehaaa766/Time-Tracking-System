@@ -1,0 +1,128 @@
+*DBConnection.java*
+java
+package dao;
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+public class DBConnection {
+    private static final String URL = "jdbc:mysql://localhost:3306/timetracking";
+    private static final String USER = "root";
+    private static final String PASSWORD = "password";
+
+    public static Connection getConnection() throws Exception {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+}
+
+
+*Employee.java*
+java
+package model;
+
+public class Employee {
+    private int id;
+    private String name;
+    private String department;
+
+    public Employee(int id, String name, String department) {
+        this.id = id;
+        this.name = name;
+        this.department = department;
+    }
+    // Getters and Setters
+}
+
+
+*TimeEntry.java*
+java
+package model;
+
+import java.time.LocalDateTime;
+
+public class TimeEntry {
+    private int id;
+    private int employeeId;
+    private int taskId;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
+    public TimeEntry(int id, int employeeId, int taskId, LocalDateTime startTime, LocalDateTime endTime) {
+        this.id = id;
+        this.employeeId = employeeId;
+        this.taskId = taskId;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+    // Getters and Setters
+}
+
+
+*TimeTrackingService.java*
+java
+package service;
+
+import dao.TimeEntryDAO;
+import model.TimeEntry;
+import java.util.List;
+
+public class TimeTrackingService {
+    private TimeEntryDAO timeEntryDAO = new TimeEntryDAO();
+
+    public void logTime(TimeEntry entry) {
+        timeEntryDAO.addTimeEntry(entry);
+    }
+
+    public List<TimeEntry> getEmployeeEntries(int employeeId) {
+        return timeEntryDAO.getEntriesByEmployee(employeeId);
+    }
+}
+
+
+*Main.java*
+java
+import service.TimeTrackingService;
+import model.TimeEntry;
+import java.time.LocalDateTime;
+
+public class Main {
+    public static void main(String[] args) {
+        TimeTrackingService service = new TimeTrackingService();
+        TimeEntry entry = new TimeEntry(1, 101, 201, LocalDateTime.now(), LocalDateTime.now().plusHours(2));
+        service.logTime(entry);
+        System.out.println("Time entry logged successfully!");
+    }
+}
+
+
+---
+
+## 🗄️ Database Schema (MySQL)
+
+sql
+CREATE DATABASE timetracking;
+
+CREATE TABLE Employee (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100),
+    department VARCHAR(50)
+);
+
+CREATE TABLE Task (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(100),
+    description TEXT
+);
+
+CREATE TABLE TimeEntry (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    employeeId INT,
+    taskId INT,
+    startTime DATETIME,
+    endTime DATETIME,
+    FOREIGN KEY (employeeId) REFERENCES Employee(id),
+    FOREIGN KEY (taskId) REFERENCES Task(id)
+);
+
+
+---
